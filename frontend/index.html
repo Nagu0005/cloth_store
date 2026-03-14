@@ -182,6 +182,25 @@
             const [searchQuery, setSearchQuery] = useState('');
             const [activeCategory, setActiveCategory] = useState('All');
 
+            // -- Auth State --
+            const [user, setUser] = useState(null); // { id, name, email, token }
+            const [authLoading, setAuthLoading] = useState(false);
+            const [authError, setAuthError] = useState('');
+            const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
+
+            // On Mount: Check LocalStorage for User Session
+            useEffect(() => {
+                const storedUser = localStorage.getItem('aurora_user');
+                if (storedUser) {
+                    try {
+                        setUser(JSON.parse(storedUser));
+                    } catch (e) {
+                        console.error('Failed to parse stored user');
+                        localStorage.removeItem('aurora_user');
+                    }
+                }
+            }, []);
+
             // Checkout state
             const [checkoutLoading, setCheckoutLoading] = useState(false);
             const [checkoutResult, setCheckoutResult] = useState(null);
@@ -274,6 +293,48 @@
 
             const cartCount = cart.reduce((acc, item) => acc + item.qty, 0);
 
+            // -- Auth Handlers --
+            const handleAuth = async (e, type) => {
+                e.preventDefault();
+                setAuthLoading(true);
+                setAuthError('');
+                
+                try {
+                    const endpoint = type === 'register' ? '/users/register' : '/users/login';
+                    const payload = type === 'register' ? 
+                        { name: authForm.name, email: authForm.email, password: authForm.password } : 
+                        { email: authForm.email, password: authForm.password };
+
+                    const res = await fetch(`${API_BASE}${endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        const userData = { ...data.data, token: data.token };
+                        setUser(userData);
+                        localStorage.setItem('aurora_user', JSON.stringify(userData));
+                        setAuthForm({ name: '', email: '', password: '' });
+                        goToHome();
+                    } else {
+                        setAuthError(data.error || 'Authentication failed');
+                    }
+                } catch (err) {
+                    setAuthError('Network error. Please try again.');
+                } finally {
+                    setAuthLoading(false);
+                }
+            };
+
+            const handleLogout = () => {
+                setUser(null);
+                localStorage.removeItem('aurora_user');
+                goToHome();
+            };
+
             // -- Checkout Handler --
             const handleCheckout = async (e) => {
                 e.preventDefault();
@@ -281,10 +342,17 @@
                     alert('Please fill in all shipping details.');
                     return;
                 }
+                if (!user) {
+                    alert('Please log in or register before checking out.');
+                    setView('login');
+                    return;
+                }
                 setCheckoutLoading(true);
                 try {
                     const payload = {
-                        user_id: 'guest-user',
+                        user_id: user.id.toString(),
+                        user_email: user.email,
+                        user_name: user.name,
                         items: cart.map(item => ({
                             product_id: item.id,
                             name: item.name,
@@ -293,9 +361,15 @@
                         })),
                         shipping_address: `${shippingAddress.name}, ${shippingAddress.address}, ${shippingAddress.city} - ${shippingAddress.pincode}, Ph: ${shippingAddress.phone}`
                     };
+
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (user && user.token) {
+                        headers['Authorization'] = `Bearer ${user.token}`;
+                    }
+
                     const res = await fetch(`${API_BASE}/checkout`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers,
                         body: JSON.stringify(payload)
                     });
                     const data = await res.json();
@@ -370,9 +444,38 @@
                                         <LIcon name="search" className="w-5 h-5" />
                                     </button>
                                 </div>
-                                <button className="hover:text-brand-500 transition">
-                                    <LIcon name="user" className="w-5 h-5" />
-                                </button>
+                                {user ? (
+                                    <div className="relative group cursor-pointer flex items-center">
+                                        <div className="flex items-center hover:text-brand-500 transition">
+                                            <LIcon name="user" className="w-5 h-5 mr-1" />
+                                            <span className="text-sm font-medium hidden md:inline">{user.name.split(' ')[0]}</span>
+                                        </div>
+                                        {/* Dropdown Menu */}
+                                        <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform origin-top border-t-2 border-t-brand-500">
+                                            <div className="p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
+                                                <p className="text-sm font-bold text-gray-800">{user.name}</p>
+                                                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                                            </div>
+                                            <ul className="py-2 text-sm text-gray-700">
+                                                <li>
+                                                    <button className="w-full text-left px-4 py-2 hover:bg-brand-50 hover:text-brand-600 transition flex items-center">
+                                                        <LIcon name="package" className="w-4 h-4 mr-2" /> My Orders
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button onClick={handleLogout} className="w-full text-left px-4 py-2 hover:bg-brand-50 hover:text-red-600 transition flex items-center border-t border-gray-100 mt-1 pt-2">
+                                                        <LIcon name="log-out" className="w-4 h-4 mr-2" /> Logout
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <button onClick={() => setView('login')} className="hover:text-brand-500 transition flex items-center">
+                                        <LIcon name="user" className="w-5 h-5" />
+                                        <span className="text-sm font-medium ml-1 hidden md:inline">Login</span>
+                                    </button>
+                                )}
                                 <button onClick={() => setIsCartOpen(true)} className="relative hover:text-brand-500 transition cursor-pointer">
                                     <LIcon name="shopping-bag" className="w-5 h-5" />
                                     {cartCount > 0 && (
@@ -631,6 +734,92 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ======================================= */}
+                        {/* AUTHENTICATION VIEWS (LOGIN / REGISTER) */}
+                        {/* ======================================= */}
+                        {(view === 'login' || view === 'register') && (
+                            <div className="animate-fade-in flex-grow flex items-center justify-center pt-24 pb-12 px-6 hero-pattern min-h-screen">
+                                <div className="absolute top-24 left-6 lg:left-12 z-20">
+                                    <button onClick={goToHome} className="flex items-center text-sm font-medium text-white hover:text-brand-300 transition group py-2">
+                                        <LIcon name="arrow-left" className="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition" /> Back to Home
+                                    </button>
+                                </div>
+
+                                <div className="bg-white/95 backdrop-blur-xl w-full max-w-md p-8 md:p-10 rounded-3xl shadow-2xl relative z-10">
+                                    <div className="text-center mb-8">
+                                        <h2 className="text-3xl font-serif text-brand-900 mb-2 font-bold">
+                                            {view === 'login' ? 'Welcome Back' : 'Join Aurora.'}
+                                        </h2>
+                                        <p className="text-gray-500 text-sm">
+                                            {view === 'login' ? 'Enter your details to access your luxury account.' : 'Create an account to track orders and save favorites.'}
+                                        </p>
+                                    </div>
+
+                                    {authError && (
+                                        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-6 border border-red-100 flex items-center">
+                                            <LIcon name="alert-circle" className="w-4 h-4 mr-2" />
+                                            {authError}
+                                        </div>
+                                    )}
+
+                                    <form onSubmit={(e) => handleAuth(e, view)} className="space-y-5">
+                                        {view === 'register' && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                                <input 
+                                                    type="text" 
+                                                    required 
+                                                    value={authForm.name}
+                                                    onChange={(e) => setAuthForm(prev => ({ ...prev, name: e.target.value }))}
+                                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
+                                                    placeholder="Jane Doe"
+                                                />
+                                            </div>
+                                        )}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                            <input 
+                                                type="email" 
+                                                required 
+                                                value={authForm.email}
+                                                onChange={(e) => setAuthForm(prev => ({ ...prev, email: e.target.value }))}
+                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
+                                                placeholder="jane@example.com"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                            <input 
+                                                type="password" 
+                                                required 
+                                                value={authForm.password}
+                                                onChange={(e) => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
+                                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition"
+                                                placeholder="••••••••"
+                                            />
+                                        </div>
+                                        
+                                        <button 
+                                            type="submit" 
+                                            disabled={authLoading}
+                                            className="w-full bg-brand-900 text-white font-bold py-3.5 rounded-xl hover:bg-brand-800 transition tracking-wider uppercase text-sm shadow-lg disabled:opacity-70 flex justify-center items-center mt-2 group"
+                                        >
+                                            {authLoading ? 'Processing...' : (view === 'login' ? 'Sign In' : 'Create Account')}
+                                            {!authLoading && <LIcon name="chevron-right" className="w-4 h-4 ml-2 group-hover:translate-x-1 transition" />}
+                                        </button>
+                                    </form>
+
+                                    <div className="mt-8 text-center text-sm text-gray-500 border-t border-gray-100 pt-6">
+                                        {view === 'login' ? (
+                                            <p>Don't have an account? <button onClick={() => { setView('register'); setAuthError(''); setAuthForm({name: '', email: '', password: ''}); }} className="font-bold text-brand-600 hover:text-brand-900 transition underline">Sign up</button></p>
+                                        ) : (
+                                            <p>Already have an account? <button onClick={() => { setView('login'); setAuthError(''); setAuthForm({name: '', email: '', password: ''}); }} className="font-bold text-brand-600 hover:text-brand-900 transition underline">Sign in</button></p>
+                                        )}
                                     </div>
                                 </div>
                             </div>

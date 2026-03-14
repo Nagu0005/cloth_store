@@ -12,8 +12,8 @@ class CheckoutService {
 
     async processCheckout(checkoutData) {
         // Business Validation
-        if (!checkoutData.user_id || !checkoutData.items || !checkoutData.shipping_address) {
-            throw new Error("Missing required checkout information");
+        if (!checkoutData.user_id || !checkoutData.items || !checkoutData.shipping_address || !checkoutData.user_email) {
+            throw new Error("Missing required checkout information (including user_email)");
         }
 
         // Calculate total amount based on items (business logic mock)
@@ -34,12 +34,37 @@ class CheckoutService {
 
         const result = await checkoutRepository.create(newCheckout);
 
-        // In a real EDA, we would publish an 'OrderPlaced' event here.
+        // Async Email Trigger
+        this.triggerOrderEmail(checkoutData.user_email, checkoutData.user_name || 'Customer', result.id, calculatedTotal);
+
         return result;
     }
 
     async completeCheckout(id) {
         return await checkoutRepository.updateStatus(id, 'COMPLETED');
+    }
+
+    // Trigger HTTP Request to Email Service directly
+    async triggerOrderEmail(email, name, orderId, total) {
+        try {
+            const EMAIL_SERVICE_URL = process.env.EMAIL_SERVICE_URL || 'http://email-service:7005/api/v1/emails';
+
+            const payload = {
+                recipient: email,
+                subject: `Order Confirmation #${orderId}`,
+                body: `Hello ${name},\n\nThank you for your purchase from Aurora Perfumes!\n\nYour order #${orderId} for a total of ₹${parseFloat(total).toLocaleString()} has been successfully processed and is being prepared for shipment.\n\nBest Regards,\nThe Aurora Team`,
+                type: 'ORDER_CONFIRMATION'
+            };
+
+            fetch(EMAIL_SERVICE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error('Failed to notify EmailService asynchronously:', err.message));
+
+        } catch (error) {
+            console.error('Failed to setup Order Confirm email trigger:', error.message);
+        }
     }
 }
 

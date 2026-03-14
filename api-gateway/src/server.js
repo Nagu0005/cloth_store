@@ -34,7 +34,8 @@ const services = {
     email: 'http://email-service:7005',
     recommendation: 'http://recommendation-service:7007',
     ad: 'http://ad-service:7002',
-    currency: 'http://currency-service:7009'
+    currency: 'http://currency-service:7009',
+    users: 'http://user-service:7010'
 };
 
 // Proxy options factory
@@ -74,6 +75,7 @@ app.use('/orders', createProxyMiddleware({ ...createProxyOptions('order', servic
 app.use('/recommendations', createProxyMiddleware({ ...createProxyOptions('recommendation', services.recommendation), pathRewrite: () => '/api/v1/recommendations' }));
 app.use('/currency', createProxyMiddleware({ ...createProxyOptions('currency', services.currency), pathRewrite: () => '/api/v1/currency' }));
 app.use('/ads', createProxyMiddleware({ ...createProxyOptions('ad', services.ad), pathRewrite: () => '/api/v1/ads' }));
+app.use('/users', createProxyMiddleware({ ...createProxyOptions('users', services.users), pathRewrite: () => '/api/v1/users' }));
 
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'UP', message: 'API Gateway is functioning normally' });

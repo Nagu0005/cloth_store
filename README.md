@@ -213,6 +213,10 @@ docker-compose up -d --build
 # Verify Gateway Health
 curl http://localhost:8080/health
 
+# Access Frontend
+# Visit the storefront: http://localhost:3001
+# Visit the admin dashboard: http://localhost:3001/admin-portal.html
+
 # Tear down and clean volumes
 docker-compose down -v
 ```

@@ -1,6 +1,20 @@
 const emailRepository = require('../repositories/emailRepository');
+const nodemailer = require('nodemailer');
 
 class EmailService {
+
+    constructor() {
+        // Initialize SMTP Transporter
+        this.transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.ethereal.email',
+            port: process.env.SMTP_PORT || 587,
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
+    }
 
     async sendEmail(emailReq) {
         if (!emailReq.recipient || !emailReq.subject || !emailReq.body || !emailReq.type) {
@@ -13,18 +27,27 @@ class EmailService {
             status: 'PENDING'
         });
 
-        // 2. Simulate sending the email (e.g., via AWS SES, SendGrid, SMTP)
+        // 2. Send actual email via SMTP
         let isSuccess = false;
         try {
-            await new Promise(resolve => setTimeout(resolve, 500));
+            const mailOptions = {
+                from: `"Aurora Perfumes" <${process.env.SMTP_USER || 'noreply@auroraperfumes.com'}>`,
+                to: emailReq.recipient,
+                subject: emailReq.subject,
+                text: emailReq.body,
+            };
 
-            if (Math.random() > 0.05) {
+            const info = await this.transporter.sendMail(mailOptions);
+            console.log(`Email dispatched to ${emailReq.recipient}. Message ID: ${info.messageId}`);
+            if (info.messageId) {
+                // If using Ethereal, log the preview URL specifically
+                if (process.env.SMTP_HOST && process.env.SMTP_HOST.includes('ethereal')) {
+                    console.log(`Preview Ethereal Mail URL: ${nodemailer.getTestMessageUrl(info)}`);
+                }
                 isSuccess = true;
-            } else {
-                throw new Error("SMTP Provider timeout");
             }
         } catch (error) {
-            console.error(`Failed to send email to ${emailReq.recipient}:`, error.message);
+            console.error(`Failed to send email to ${emailReq.recipient} via SMTP:`, error.message);
         }
 
         // 3. Update the database record with the final status
@@ -35,7 +58,7 @@ class EmailService {
         });
 
         if (!isSuccess) {
-            throw new Error("Failed to dispatch email via provider");
+            throw new Error("Failed to dispatch email via SMTP provider");
         }
 
         return updatedEmail;

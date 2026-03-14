@@ -57,6 +57,35 @@ services:
         condition: service_healthy
       currency-service:
         condition: service_healthy
+      user-service:
+        condition: service_healthy
+    networks:
+      - perfume_net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # Authentication Service
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "7010:7010"
+    environment:
+      - PORT=7010
+      - NODE_ENV=production
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=user_db
+      - JWT_SECRET=super-secret-jwt-key-aurora
+      - EMAIL_SERVICE_URL=http://email-service:7005/api/v1/emails
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - perfume_net
     restart: unless-stopped
@@ -223,6 +252,11 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=email_db
+      - SMTP_HOST=smtp.ethereal.email
+      - SMTP_PORT=465
+      - SMTP_SECURE=true
+      - SMTP_USER=yuz25warufuixewz@ethereal.email
+      - SMTP_PASS=ttAXXqHj24Nn38M1Jd
     depends_on:
       db:
         condition: service_healthy
@@ -305,6 +339,23 @@ services:
       resources:
         limits:
           memory: 256M
+          cpus: '0.25'
+
+  # Frontend Service
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3001:80"
+    networks:
+      - perfume_net
+    restart: unless-stopped
+    depends_on:
+      - api-gateway
+    deploy:
+      resources:
+        limits:
+          memory: 128M
           cpus: '0.25'
 
 volumes:
