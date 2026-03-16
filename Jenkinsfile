@@ -71,16 +71,18 @@ pipeline {
         
         stage('Update kubeconfig') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-jenkins'
-                ]]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-jenkins']]) {
                     sh '''
-                    aws eks update-kubeconfig --region ap-south-1 --name devops-cluster
+                    aws eks update-kubeconfig \
+                        --region ${AWS_DEFAULT_REGION} \
+                        --name ${CLUSTER_NAME} \
+                        --alias ${CLUSTER_NAME} \
+                        --kubeconfig /var/lib/jenkins/.kube/config
                     '''
                 }
             }
         }
+        
         stage('Clean Helm values files') {
             steps {
                 script {
