@@ -68,12 +68,7 @@ pipeline {
                 }
             }
         }
-        stage('Verify Cluster') {
-            steps {
-                sh 'kubectl get nodes'
-                sh 'kubectl get pods -A'
-            }
-        }
+        
         stage('Update kubeconfig') {
             steps {
                 withCredentials([[
