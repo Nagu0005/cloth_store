@@ -69,10 +69,15 @@ pipeline {
             }
         }
 
-        stage('Setup Kubeconfig') {
+        stage('Update kubeconfig') {
             steps {
-                script {
-                    sh "aws eks update-kubeconfig --region ${AWS_DEFAULT_REGION} --name ${CLUSTER_NAME}"
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-jenkins'
+                ]]) {
+                    sh '''
+                    aws eks update-kubeconfig --region ap-south-1 --name devops-cluster
+                    '''
                 }
             }
         }
