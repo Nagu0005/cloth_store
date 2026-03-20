@@ -8,3 +8,4 @@ CREATE DATABASE email_db;
 CREATE DATABASE recommendation_db;
 CREATE DATABASE ad_db;
 CREATE DATABASE currency_db;
+CREATE DATABASE user_db;
