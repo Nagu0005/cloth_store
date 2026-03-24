@@ -1,7 +1,7 @@
 {
     "name": "catalog-service",
     "version": "1.0.0",
-    "description": "Product Catalog Service for Aurora Perfumes",
+    "description": "Product Catalog Service for Cloth Store",
     "main": "src/server.js",
     "scripts": {
         "start": "node src/server.js",

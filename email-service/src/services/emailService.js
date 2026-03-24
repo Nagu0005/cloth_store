@@ -31,7 +31,7 @@ class EmailService {
         let isSuccess = false;
         try {
             const mailOptions = {
-                from: `"Aurora Perfumes" <${process.env.SMTP_USER || 'noreply@auroraperfumes.com'}>`,
+                from: `"Cloth Store" <${process.env.SMTP_USER || 'noreply@clothstore.com'}>`,
                 to: emailReq.recipient,
                 subject: emailReq.subject,
                 text: emailReq.body,

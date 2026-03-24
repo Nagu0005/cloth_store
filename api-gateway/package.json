@@ -1,7 +1,7 @@
 {
     "name": "api-gateway",
     "version": "1.0.0",
-    "description": "API Gateway for Perfume Ecommerce",
+    "description": "API Gateway for Cloth Ecommerce",
     "main": "src/server.js",
     "scripts": {
         "start": "node src/server.js",

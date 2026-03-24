@@ -4,7 +4,7 @@ services:
   # Shared Database for all microservices
   db:
     image: postgres:15-alpine
-    container_name: perfume_postgres
+    container_name: cloth_postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -60,7 +60,7 @@ services:
       user-service:
         condition: service_started
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -81,13 +81,13 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=user_db
-      - JWT_SECRET=super-secret-jwt-key-aurora
+      - JWT_SECRET=super-secret-jwt-key-bharat
       - EMAIL_SERVICE_URL=http://email-service:7005/api/v1/emails
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -112,7 +112,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -136,7 +136,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -160,7 +160,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -184,7 +184,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -208,7 +208,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -232,7 +232,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -261,7 +261,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -285,7 +285,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -309,7 +309,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -333,7 +333,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     deploy:
       resources:
@@ -348,7 +348,7 @@ services:
     ports:
       - "3001:80"
     networks:
-      - perfume_net
+      - cloth_net
     restart: unless-stopped
     depends_on:
       - api-gateway
@@ -363,5 +363,5 @@ volumes:
 
 
 networks:
-  perfume_net:
+  cloth_net:
     driver: bridge

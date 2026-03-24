@@ -54,7 +54,7 @@ class ProductService {
             brand: productData.brand || 'Unknown',
             category: productData.category || 'Unisex',
             base_price: productData.base_price,
-            gst_percentage: productData.gst_percentage || 18, // Default GST to 18% as per Indian norms for perfumes
+            gst_percentage: productData.gst_percentage || 5, // Default GST to 5% for clothes
             image_url: productData.image_url || '',
             description: productData.description || ''
         });

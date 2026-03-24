@@ -55,12 +55,12 @@ pipeline {
                         buildStages["Build ${service}"] = {
                             stage("Docker Build & Push ${service}") {
                                 echo "Building ${service}..."
-                                sh "docker build -t ${ECR_REGISTRY}/perfume-${service}:${IMAGE_TAG} ./${service}"
-                                sh "docker build -t ${ECR_REGISTRY}/perfume-${service}:latest ./${service}"
+                                sh "docker build -t ${ECR_REGISTRY}/cloth-${service}:${IMAGE_TAG} ./${service}"
+                                sh "docker build -t ${ECR_REGISTRY}/cloth-${service}:latest ./${service}"
                                 
                                 echo "Pushing ${service}..."
-                                sh "docker push ${ECR_REGISTRY}/perfume-${service}:${IMAGE_TAG}"
-                                sh "docker push ${ECR_REGISTRY}/perfume-${service}:latest"
+                                sh "docker push ${ECR_REGISTRY}/cloth-${service}:${IMAGE_TAG}"
+                                sh "docker push ${ECR_REGISTRY}/cloth-${service}:latest"
                             }
                         }
                     }
@@ -109,7 +109,7 @@ pipeline {
                         // Set KUBECONFIG for Jenkins user
                         withEnv(["KUBECONFIG=/var/lib/jenkins/.kube/config"]) {
                             echo "Deploying PostgreSQL Database..."
-                            sh "helm upgrade --install db ./helm/db --namespace perfume --create-namespace --wait"
+                            sh "helm upgrade --install db ./helm/db --namespace cloth --create-namespace --wait"
 
                             def servicesList = SERVICES.split(',')
 
@@ -117,8 +117,8 @@ pipeline {
                             echo "Deploying ${service}..."
                             sh """
                             helm upgrade --install ${service} ./helm/${service} \
-                            --namespace perfume \
-                            --set image.repository=${ECR_REGISTRY}/perfume-${service} \
+                            --namespace cloth \
+                            --set image.repository=${ECR_REGISTRY}/cloth-${service} \
                             --set image.tag=${IMAGE_TAG} \
                             --set ingress.enabled=true \
                             --wait

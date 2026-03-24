@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userRepository = require('../repositories/userRepository');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt-key-aurora';
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt-key-bharat';
 
 class UserService {
     async registerUser(userData) {
@@ -64,8 +64,8 @@ class UserService {
 
             const payload = {
                 recipient: email,
-                subject: 'Welcome to Aurora Perfumes',
-                body: `Hello ${name},\n\nWelcome to Aurora Perfumes! We are thrilled to have you join our exclusive club.\n\nDiscover the essence of elegance today.\n\nBest Regards,\nThe Aurora Team`,
+                subject: 'Welcome to Cloth Store',
+                body: `Hello ${name},\n\nWelcome to Cloth Store! We are thrilled to have you join our exclusive club.\n\nDiscover the essence of style today.\n\nBest Regards,\nThe Cloth Team`,
                 type: 'WELCOME'
             };
 

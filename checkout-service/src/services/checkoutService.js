@@ -52,7 +52,7 @@ class CheckoutService {
             const payload = {
                 recipient: email,
                 subject: `Order Confirmation #${orderId}`,
-                body: `Hello ${name},\n\nThank you for your purchase from Aurora Perfumes!\n\nYour order #${orderId} for a total of ₹${parseFloat(total).toLocaleString()} has been successfully processed and is being prepared for shipment.\n\nBest Regards,\nThe Aurora Team`,
+                body: `Hello ${name},\n\nThank you for your purchase from Cloth Store!\n\nYour order #${orderId} for a total of ₹${parseFloat(total).toLocaleString()} has been successfully processed and is being prepared for shipment.\n\nBest Regards,\nThe Cloth Team`,
                 type: 'ORDER_CONFIRMATION'
             };
 

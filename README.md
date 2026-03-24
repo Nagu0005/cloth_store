@@ -1,4 +1,4 @@
-# Perfume E-Commerce Platform - Microservices Architecture
+# Bharat Cloth Store - Microservices Architecture
 
 An enterprise-level E-commerce platform built with a modern Microservices Architecture, API Gateway pattern, and Event-Driven Architecture (EDA) principles (Node.js, Express, PostgreSQL, Docker).
 
@@ -9,7 +9,7 @@ An enterprise-level E-commerce platform built with a modern Microservices Archit
 The system is composed of several independent, single-responsibility microservices. Each service has its own dedicated PostgreSQL database to ensure loose coupling and bounded contexts.
 
 *   **API Gateway** (`:8090`): Central entry point for all client requests. Handles proxying, rate-limiting, and security.
-*   **Catalog Service** (`:7006`): Manages perfume products, categories, and inventory.
+*   **Catalog Service** (`:7006`): Manages cloth products, categories, and inventory.
 *   **Cart Service** (`:7001`): Manages user shopping carts.
 *   **Checkout Service** (`:7004`): Orchestrates the checkout process, calculates totals, and initiates orders.
 *   **Order Service** (`:5003`): Manages order lifecycles and statuses.
@@ -56,7 +56,7 @@ graph TD
 ## 📂 Project File Structure
 
 ```text
-c:\Data_Nagendra\perfume_website\
+c:\Data_Nagendra\cloth_website\
 │
 ├── api-gateway/            # Express-based reverse proxy middleware
 │   ├── src/server.js       # Target definitions and rate-limiters
@@ -79,14 +79,14 @@ c:\Data_Nagendra\perfume_website\
 │   └── package.json
 │
 ├── init-db.sql             # Global PostgreSQL Initialization script
-└── docker-compose.yml      # Container orchestration file
-```
+82: └── docker-compose.yml      # Container orchestration file
+83: ```
 
 ---
 
 ## 🚀 How the Project Works (Flow)
 
-1.  **Browsing**: The user hits `index.html`. The frontend calls `/api/v1/catalog` (via API Gateway) to load perfumes.
+1.  **Browsing**: The user hits `index.html`. The frontend calls `/api/v1/catalog` (via API Gateway) to load products.
 2.  **Cart**: Adding to cart sends a `POST /api/v1/cart`.
 3.  **Checkout**: The user clicks "Proceed to Secure Checkout". A request goes to `/api/v1/checkout/`.
 4.  **Order Generation**: The Checkout service validates items, applies shipping logic, and forwards the authorized intent to the `Order Service`.
@@ -126,7 +126,7 @@ Import these payloads into **Postman** to test the system endpoints. **Note**: A
       "quantity": 2
     }
   ],
-  "shipping_address": "123 Fragrance Lane, Paris, France"
+  "shipping_address": "123 Fashion Lane, Mumbai, India"
 }
 ```
 
@@ -144,7 +144,7 @@ Import these payloads into **Postman** to test the system endpoints. **Note**: A
 ```json
 {
   "status": "SHIPPED",
-  "tracking_number": "TRK-987654321-FR"
+  "tracking_number": "TRK-987654321-IN"
 }
 ```
 
@@ -159,7 +159,7 @@ Import these payloads into **Postman** to test the system endpoints. **Note**: A
 {
   "to": "customer@example.com",
   "subject": "Order Confirmation #101",
-  "body": "Thank you for shopping at our Perfume Store! Your order is being processed."
+  "body": "Thank you for shopping at our Bharat Cloth Store! Your order is being processed."
 }
 ```
 
@@ -181,7 +181,7 @@ Implement a fully automated Continuous Integration and Continuous Deployment pip
 *   **CD Stage**: Trigger ArgoCD or run `kubectl apply` to deploy the new image tags seamlessly without downtime.
 
 ### 3. Managed Database (AWS RDS / GCP Cloud SQL)
-Instead of running a PostgreSQL instance inside a container (`perfume_postgres`), production systems must use managed database services.
+Instead of running a PostgreSQL instance inside a container (cloth_postgres), production systems must use managed database services.
 *   **High Availability**: Provision Multi-AZ RDS deployments for automatic failovers.
 *   **Read Replicas**: Direct read-only traffic (like the Catalog Service) to read replicas, and write-traffic (Order, Cart) to the primary instance.
 *   **Automated Backups**: Configure point-in-time recovery and snapshot backups.
@@ -215,6 +215,12 @@ curl http://localhost:8090/health
 
 # Access Frontend
 # Visit the storefront: http://localhost:3001
+# Visit the admin dashboard: http://localhost:3001/admin-portal.html
+
+# Tear down and clean volumes
+docker-compose down -v
+```
+front: http://localhost:3001
 # Visit the admin dashboard: http://localhost:3001/admin-portal.html
 
 # Tear down and clean volumes

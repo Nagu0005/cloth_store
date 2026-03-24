@@ -1,7 +1,7 @@
 {
     "name": "perfume-frontend",
     "version": "1.0.0",
-    "description": "Frontend for Aurora Perfumes",
+    "description": "Frontend for Cloth Store",
     "main": "server.js",
     "scripts": {
         "start": "node server.js"
